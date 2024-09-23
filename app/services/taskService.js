@@ -1,7 +1,5 @@
 const redis = require("../config/redisConfiguration");
-const fs = require("fs");
-const path = require("path");
-const logFilePath = path.join(__dirname, "../../log/task.log");
+const logger = require("./logger"); // Import the logger module
 
 // Queue task function
 exports.queueTask = async (userId) => {
@@ -18,17 +16,9 @@ const processTaskQueue = async (userId) => {
     const task = await redis.rpop(`tasks:${userId}`);
     if (task) {
       await new Promise((resolve) => setTimeout(resolve, 1000)); // 1 task per second
-      logTaskCompletion(userId);
+      logger.logTaskCompletion(userId); // Log task completion using the logger
     } else {
       break;
     }
   }
-};
-
-// Log task completion to file
-const logTaskCompletion = (userId) => {
-  const logMessage = `${userId} - task completed at ${Date.now()}\n`;
-  fs.appendFile(logFilePath, logMessage, (err) => {
-    if (err) throw err;
-  });
 };
